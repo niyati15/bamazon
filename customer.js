@@ -13,37 +13,47 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
 
-    afterConnection();
+    showProducts();
+    askCustomer();
 });
 
-function afterConnection(){
-    connection.query("SELECT * FROM products", function(err, res) {
+function showProducts() {
+    connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
-        // Log all results of the SELECT statement
-        // console.log(res);
         formatter(res);
-        connection.end();
-      });
+        // connection.end();
+    });
+}
+
+function askCustomer() {
+    ask
+        .prompt([
+            {
+                type: "input",
+                message: "What would you like to buy today?",
+                name: "product"
+            },
+            {
+                type: "input",
+                message: "How many would you like to buy?",
+                name: "quantity"
+            }
+        ]).then(function (inquirerResponse) {
+                console.log(inquirerResponse.product);
+                console.log(inquirerResponse.quantity);
+        });
 }
 
 function formatter(arr) {
-        
 
-
-    // instantiate
     var table = new Table({
         head: ['ID', 'PRODUCT NAME', 'DEPARTMENT', 'PRICE (USD)', 'QUANTITY']
-      , colWidths: [10, 30, 20, 15, 15]
+        , colWidths: [10, 30, 20, 15, 15]
     });
     for (var i = 0; i < arr.length; i++) {
-     
-    // table is an Array, so you can `push`, `unshift`, `splice` and friends
-    table.push(
-        [i+1, arr[i].product_name, arr[i].department_name, arr[i].price, arr[i].quantity]
-    );
-     
-    
-}
-console.log(table.toString());
-// console.log("- - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+        table.push(
+            [i + 1, arr[i].product_name, arr[i].department_name, arr[i].price, arr[i].quantity]
+        );
+    }
+    console.log(table.toString());
 }
