@@ -1,8 +1,6 @@
 # Bamazon
 It is a CLI app that uses a SQL database to emulate amazon.
 
-Click [**here**](https://vimeo.com/199264707) to watch a video walkthrough of the applications.
-
 ## Technologies
 
 MySQL | NodeJS | Javascript
