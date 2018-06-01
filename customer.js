@@ -48,48 +48,27 @@ function askCustomer() {
 }
 
 function reduceQuantity(productID, quantity) {
-    var newQuantity;
-    connection.query("SELECT quantity FROM products WHERE id = " + productID, function (err, res) {
+    var newQuantity = 0;
+    var totalPrice = 0;
+    connection.query("SELECT quantity, price FROM products WHERE id = " + productID, function (err, res) {
         if (err) throw err;
         // console.log("existing quantity", res[0].quantity);
         newQuantity = res[0].quantity - quantity;
+        totalPrice = quantity * res[0].price;
+        // console.log(totalPrice);
         // console.log("new quantity", newQuantity);
         if (newQuantity > 0) {
-            updateProduct(productID, newQuantity);
+            updateProduct(productID, newQuantity, totalPrice);
         } else {
             console.log("Sorry! You may have to select a quantity less than " + quantity);
-            ask
-                .prompt([
-                    {
-                        type: "confirm",
-                        message: "Do you want to continue?",
-                        name: "answer",
-                        default: false
-                    }
-                ]).then(function (inquirerResponse) {
-                    if (inquirerResponse.answer) {
-                        ask
-                            .prompt([
-                                {
-                                    type: "input",
-                                    message: "How many would you like to buy?",
-                                    name: "quantity"
-                                }
-                            ]).then(function (inquirerResponse) {
-                                var quantity = inquirerResponse.quantity;
-                                var productID = inquirerResponse.productID;
-                                reduceQuantity(productID, quantity);
-
-                            });
-                    }
-                });
+            buyAgain();
             // connection.end();
         }
     });
 
 }
 
-function updateProduct(productID, quantity) {
+function updateProduct(productID, quantity, price) {
     var query = connection.query(
         "UPDATE products SET ? WHERE ?",
         [
@@ -101,15 +80,37 @@ function updateProduct(productID, quantity) {
             }
         ],
         function (err, res) {
+            // showProducts();
+
             connection.query("SELECT * FROM products", function (err, res) {
                 if (err) throw err;
                 formatter(res);
-                askCustomer();
-
+                console.log("Your total price is $" + price);
+                buyAgain();
             });
 
         }
     );
+
+}
+
+function buyAgain() {
+    ask
+        .prompt([
+            {
+                type: "confirm",
+                message: "Do you want to continue?",
+                name: "answer",
+                default: false
+            }
+        ]).then(function (inquirerResponse) {
+            if (inquirerResponse.answer) {
+                askCustomer();
+            } else {
+                console.log("Thanks for visiting Bamazon.");
+                connection.end();
+            }
+        });
 }
 
 function formatter(arr) {
